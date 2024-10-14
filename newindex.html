@@ -1091,52 +1091,57 @@
 
   // Function to update the graph
   function updateGraph() {
-    // Define the dimensions and margins of the graph
-    const margin = { top: 20, right: 30, bottom: 40, left: 40 },
-      width = 800 - margin.left - margin.right,
-      height = 400 - margin.top - margin.bottom;
+  // Define the dimensions and margins of the graph
+  const margin = { top: 20, right: 30, bottom: 40, left: 40 },
+        width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
 
-    // Append the svg object to the body of the page
-    const svg = d3.select("#graph-container svg")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-      .attr("transform", `translate(${margin.left},${margin.top})`);
+  // Clear the old svg content
+  const svgContainer = d3.select("#graph-container svg");
+  svgContainer.selectAll("*").remove();  // This removes the old circles and axes
 
-    // Take initial data
-    const data = [
-      { x: document.querySelector('input[name="range1"]').value, y: document.querySelector('input[name="alpha1"]').value },
-      { x: document.querySelector('input[name="range2"]').value, y: document.querySelector('input[name="alpha2"]').value },
-      { x: document.querySelector('input[name="range3"]').value, y: document.querySelector('input[name="alpha3"]').value },
-    ];
+  // Append the new svg object
+  const svg = svgContainer
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Define the scales
-    const xScale = d3.scaleLinear()
-      .domain([0, 256])
-      .range([0, width]);
+  // Take updated data
+  const data = [
+    { x: document.querySelector('input[name="range1"]').value, y: document.querySelector('input[name="alpha1"]').value },
+    { x: document.querySelector('input[name="range2"]').value, y: document.querySelector('input[name="alpha2"]').value },
+    { x: document.querySelector('input[name="range3"]').value, y: document.querySelector('input[name="alpha3"]').value },
+  ];
 
-    const yScale = d3.scaleLinear()
-      .domain([0, 256])
-      .range([height, 0]);
+  // Define the scales
+  const xScale = d3.scaleLinear()
+    .domain([0, 256])
+    .range([0, width]);
 
-    // Add the X Axis
-    svg.append("g")
-      .attr("transform", `translate(0,${height})`)
-      .call(d3.axisBottom(xScale));
+  const yScale = d3.scaleLinear()
+    .domain([0, 256])
+    .range([height, 0]);
 
-    // Add the Y Axis
-    svg.append("g")
-      .call(d3.axisLeft(yScale));
+  // Add the X Axis
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(xScale));
 
-    // Add the points
-    svg.selectAll("circle")
-      .data(data)
-      .enter().append("circle")
-      .attr("cx", d => xScale(d.x))
-      .attr("cy", d => yScale(d.y))
-      .attr("r", 5)
-      .style("fill", "#69b3a2");
-  }
+  // Add the Y Axis
+  svg.append("g")
+    .call(d3.axisLeft(yScale));
+
+  // Add the new points
+  svg.selectAll("circle")
+    .data(data)
+    .enter().append("circle")
+    .attr("cx", d => xScale(d.x))
+    .attr("cy", d => yScale(d.y))
+    .attr("r", 5)
+    .style("fill", "#69b3a2");
+}
+
 </script>
 
 <!DOCTYPE html>
