@@ -5,6 +5,8 @@
   use vector and matrix maths operations.  Source: https://github.com/toji/gl-matrix
 -->
 <script type="text/javascript" src="gl-matrix.js"></script>
+<!--Graph-->
+<script src="https://d3js.org/d3.v7.min.js"></script>
 
 <!-- Main WebGL functions -->
 <script type="text/javascript">
@@ -1083,16 +1085,75 @@
       document.getElementById("error").innerHTML + "<p>" + msg + "</p>";
   }
 
+  document.addEventListener("DOMContentLoaded", function () {
+    updateGraph();
+  });
+
+  // Function to update the graph
+  function updateGraph() {
+  // Define the dimensions and margins of the graph
+  const margin = { top: 20, right: 30, bottom: 40, left: 40 },
+        width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+  // Clear the old svg content
+  const svgContainer = d3.select("#graph-container svg");
+  svgContainer.selectAll("*").remove();  // This removes the old circles and axes
+
+  // Append the new svg object
+  const svg = svgContainer
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Take updated data
+  const data = [
+    { x: document.querySelector('input[name="range1"]').value, y: document.querySelector('input[name="alpha1"]').value },
+    { x: document.querySelector('input[name="range2"]').value, y: document.querySelector('input[name="alpha2"]').value },
+    { x: document.querySelector('input[name="range3"]').value, y: document.querySelector('input[name="alpha3"]').value },
+  ];
+
+  // Define the scales
+  const xScale = d3.scaleLinear()
+    .domain([0, 256])
+    .range([0, width]);
+
+  const yScale = d3.scaleLinear()
+    .domain([0, 256])
+    .range([height, 0]);
+
+  // Add the X Axis
+  svg.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .call(d3.axisBottom(xScale));
+
+  // Add the Y Axis
+  svg.append("g")
+    .call(d3.axisLeft(yScale));
+
+  // Add the new points
+  svg.selectAll("circle")
+    .data(data)
+    .enter().append("circle")
+    .attr("cx", d => xScale(d.x))
+    .attr("cy", d => yScale(d.y))
+    .attr("r", 5)
+    .style("fill", "#69b3a2");
+}
+
 </script>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two Column Layout</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pig X-Ray</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
+
 <body onload="main();">
   <div class="container">
     <div class="left-column">
@@ -1104,101 +1165,116 @@
     </div>
 
     <div class="right-column">
-    <b> Rendering parameters </b>
-    <div>Step size: <input type="range" min="10" max="10000" value="1000" class="slider" id="stepSize"
-        oninput="triggerRendering();"> </div>
-    <div>
-      <br>
-      <b>Compositing method</b>
-      <div><input type="radio" name="compositing" value="ftb" onchange="triggerRendering();" checked>Front-to-back</div>
-      <div><input type="radio" name="compositing" value="fhp" onchange="triggerRendering();">First hit-point</div>
-      <div><input type="radio" name="compositing" value="mip" onchange="triggerRendering();">Maximum-intensity
-        projection
+      <b> Rendering parameters </b>
+      <div>Step size: <input type="range" min="10" max="10000" value="1000" class="slider" id="stepSize"
+          oninput="triggerRendering();"> </div>
+      <div>
+        <br>
+        <b>Compositing method</b>
+        <div><input type="radio" name="compositing" value="ftb" onchange="triggerRendering();" checked>Front-to-back
+        </div>
+        <div><input type="radio" name="compositing" value="fhp" onchange="triggerRendering();">First hit-point</div>
+        <div><input type="radio" name="compositing" value="mip" onchange="triggerRendering();">Maximum-intensity
+          projection
+        </div>
       </div>
-    </div>
-    </p>
-    <p>
-      <!--Add some UI elements here to modify the transfer function.  
+      </p>
+      <p>
+        <!--Add some UI elements here to modify the transfer function.  
     As mentioned above, you need to call the function 'triggerTransferFunctionUpdate' 
-    to trigger and update of the GPU representation of the transfer function texture.  
+    to trigger and update of the GPU representation of the  function texture.  
     If you don't call that function, no change will be visible.-->
 
-      <!-- Color picker for background color -->
-      <b> Background Color </b>
-      <input type="color" id="bgColorPicker" value="#000000" onchange="updateBackgroundColor()">
+        <!-- Color picker for background color -->
+        <b> Background Color </b>
+        <input type="color" id="bgColorPicker" value="#000000" onchange="updateBackgroundColor()">
 
-      <!-- Color and alpha controls for the transfer function -->
-    <div class="transferControls">
-      <b> Transfer-function Controls </b>
-      <!-- Color 1 settings -->
-      <div class="slider1">
-        <label for="color1">Color 1: </label>
-        <input type="color" name="color1" value="#FF0000" onchange="triggerTransferFunctionUpdate()">
+        <!-- Color and alpha controls for the transfer function -->
+      <div class="transferControls">
+        <b> Transfer-function Controls </b>
+        <!-- Color 1 settings -->
+        <div class="slider1">
+          <label for="color1">Color 1: </label>
+          <input type="color" name="color1" value="#FF0000" onchange="triggerTransferFunctionUpdate()">
 
-        <label for="alpha1">Alpha (0:250): </label>
-        <input type="text" name="alpha1" min="0" max="256" value="100" onchange="triggerTransferFunctionUpdate()">
+          <label for="alpha1">Alpha (0:256): </label>
+          <input type="text" name="alpha1" min="0" max="256" value="10"
+            onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
-        <label for="start1">Start (0:250): </label>
-        <input type="text" name="start1" min="0" max="256" value="5" onchange="triggerTransferFunctionUpdate()">
+          <label for="start1">Start (0:256): </label>
+          <input type="text" name="start1" min="0" max="256" value="5"
+            onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
-        <label for="range1">Range (0:250): </label>
-        <input type="text" name="range1" min="0" max="256" value="1" onchange="triggerTransferFunctionUpdate()">
+          <label for="range1">Range (0:256): </label>
+          <input type="text" name="range1" min="0" max="256" value="1"
+            onchange="triggerTransferFunctionUpdate(), updateGraph()">
+        </div>
+
+        <!-- Color 2 settings -->
+        <div class="slider2">
+          <label for="color2">Color 2: </label>
+          <input type="color" name="color2" value="#0000FF" onchange="triggerTransferFunctionUpdate()">
+
+          <label for="alpha2">Alpha (0:256): </label>
+          <input type="text" name="alpha2" min="0" max="256" value="100" 
+          onchange="triggerTransferFunctionUpdate(), updateGraph()">
+
+          <label for="start2">Start (0:256): </label>
+          <input type="text" name="start2" min="0" max="256" value="15" onchange="triggerTransferFunctionUpdate()">
+
+          <label for="range2">Range (0:256): </label>
+          <input type="text" name="range2" min="0" max="256" value="5" 
+          onchange="triggerTransferFunctionUpdate(), updateGraph()">
+        </div>
+
+        <!-- Color 3 settings -->
+        <div class="slider3">
+          <label for="color3">Color 3: </label>
+          <input type="color" name="color3" value="#00FF00" onchange="triggerTransferFunctionUpdate()">
+
+          <label for="alpha3">Alpha (0:256): </label>
+          <input type="text" name="alpha3" min="0" max="256" value="100"
+          onchange="triggerTransferFunctionUpdate(), updateGraph()">
+
+          <label for="start3">Start (0:256): </label>
+          <input type="text" name="start3" min="0" max="256" value="25" onchange="triggerTransferFunctionUpdate()">
+
+          <label for="range3">Range (0:256): </label>
+          <input type="text" name="range3" min="0" max="256" value="5"
+          onchange="triggerTransferFunctionUpdate(), updateGraph()">
+        </div>
       </div>
 
-      <!-- Color 2 settings -->
-      <div class="slider2">
-        <label for="color2">Color 2: </label>
-        <input type="color" name="color2" value="#0000FF" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="alpha2">Alpha (0:250): </label>
-        <input type="text" name="alpha2" min="0" max="256" value="100" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="start2">Start (0:256): </label>
-        <input type="text" name="start2" min="0" max="256" value="15" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="range2">Range (0:256): </label>
-        <input type="text" name="range2" min="0" max="256" value="5" onchange="triggerTransferFunctionUpdate()">
+      <b> Camera </b>
+      <div> r: <input type="range" min="0" max="100" value="50" class="slider" id="camera-r"
+          oninput="triggerRendering();">
       </div>
-
-      <!-- Color 3 settings -->
-      <div class="slider3">
-        <label for="color3">Color 3: </label>
-        <input type="color" name="color3" value="#00FF00" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="alpha3">Alpha (0:250): </label>
-        <input type="text" name="alpha3" min="0" max="256" value="100" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="start3">Start (0:256): </label>
-        <input type="text" name="start3" min="0" max="256" value="25" onchange="triggerTransferFunctionUpdate()">
-
-        <label for="range3">Range (0:256): </label>
-        <input type="text" name="range3" min="0" max="256" value="5" onchange="triggerTransferFunctionUpdate()">
+      <div> phi: <input type="range" min="0" max="360" value="35" class="slider" id="camera-phi"
+          oninput="triggerRendering();"></div>
+      <div> theta: <input type="range" min="1" max="180" value="65" class="slider" id="camera-theta"
+          oninput="triggerRendering();"></div>
+      </p>
+      <p>
+        <b>Rendering output:</b>
+      <div><input type="radio" name="debug-output" value="volume" onchange="triggerRendering();" checked>Volume
+        Renderings
+      </div>
+      <div><input type="radio" name="debug-output" value="entry" onchange="triggerRendering();">Entry Points</div>
+      <div><input type="radio" name="debug-output" value="exit" onchange="triggerRendering();">Exit Points</div>
+      <div><input type="radio" name="debug-output" value="direction" onchange="triggerRendering();">Ray direction</div>
+      <div><input type="radio" name="debug-output" value="transfer" onchange="triggerRendering();">Transfer Function
+      </div>
+      <div><input type="radio" name="debug-output" value="slice" onchange="triggerRendering();">Volume Slice</div>
+      <div><input type="radio" name="debug-output" value="slice-transfer" onchange="triggerRendering();">Volume Slice
+        with
+        transfer function</div>
+      </p>
+      <div id="graph-container">
+        <b>Node-based visualizing:</b>
+        <svg width="800" height="600"></svg>
       </div>
     </div>
-
-    <b> Camera </b>
-    <div> r: <input type="range" min="0" max="100" value="50" class="slider" id="camera-r"
-        oninput="triggerRendering();">
-    </div>
-    <div> phi: <input type="range" min="0" max="360" value="35" class="slider" id="camera-phi"
-        oninput="triggerRendering();"></div>
-    <div> theta: <input type="range" min="1" max="180" value="65" class="slider" id="camera-theta"
-        oninput="triggerRendering();"></div>
-    </p>
-    <p>
-      <b>Rendering output:</b>
-    <div><input type="radio" name="debug-output" value="volume" onchange="triggerRendering();" checked>Volume Renderings
-    </div>
-    <div><input type="radio" name="debug-output" value="entry" onchange="triggerRendering();">Entry Points</div>
-    <div><input type="radio" name="debug-output" value="exit" onchange="triggerRendering();">Exit Points</div>
-    <div><input type="radio" name="debug-output" value="direction" onchange="triggerRendering();">Ray direction</div>
-    <div><input type="radio" name="debug-output" value="transfer" onchange="triggerRendering();">Transfer Function</div>
-    <div><input type="radio" name="debug-output" value="slice" onchange="triggerRendering();">Volume Slice</div>
-    <div><input type="radio" name="debug-output" value="slice-transfer" onchange="triggerRendering();">Volume Slice with
-      transfer function</div>
-    </p>
   </div>
-</div>
 </body>
 
 </html>
