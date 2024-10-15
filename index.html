@@ -1109,9 +1109,9 @@
 
     // Take initial data
     const data = [
-      { x: document.querySelector('input[name="range1"]').value, y: document.querySelector('input[name="alpha1"]').value, color: document.querySelector('input[name="color1"]').value },
-      { x: document.querySelector('input[name="range2"]').value, y: document.querySelector('input[name="alpha2"]').value, color: document.querySelector('input[name="color2"]').value },
-      { x: document.querySelector('input[name="range3"]').value, y: document.querySelector('input[name="alpha3"]').value, color: document.querySelector('input[name="color3"]').value },
+      { x: document.querySelector('input[name="start1"]').value, y: document.querySelector('input[name="alpha1"]').value, color: document.querySelector('input[name="color1"]').value },
+      { x: document.querySelector('input[name="start2"]').value, y: document.querySelector('input[name="alpha2"]').value, color: document.querySelector('input[name="color2"]').value },
+      { x: document.querySelector('input[name="start3"]').value, y: document.querySelector('input[name="alpha3"]').value, color: document.querySelector('input[name="color3"]').value },
     ];
 
     // Define the scales
@@ -1194,15 +1194,15 @@
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="alpha1">Alpha (0:256): </label>
-          <input type="text" name="alpha1" min="0" max="256" value="10"
+          <input type="text" name="alpha1" min="0" max="256" value="100"
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="start1">Start (0:256): </label>
-          <input type="text" name="start1" min="0" max="256" value="5"
+          <input type="text" name="start1" min="0" max="256" value="25"
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="range1">Range (0:256): </label>
-          <input type="text" name="range1" min="0" max="256" value="1"
+          <input type="text" name="range1" min="0" max="256" value="5"
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
         </div>
 
@@ -1217,7 +1217,7 @@
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="start2">Start (0:256): </label>
-          <input type="text" name="start2" min="0" max="256" value="15" 
+          <input type="text" name="start2" min="0" max="256" value="140" 
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="range2">Range (0:256): </label>
@@ -1236,11 +1236,11 @@
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="start3">Start (0:256): </label>
-          <input type="text" name="start3" min="0" max="256" value="25" 
+          <input type="text" name="start3" min="0" max="256" value="75" 
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
 
           <label for="range3">Range (0:256): </label>
-          <input type="text" name="range3" min="0" max="256" value="5"
+          <input type="text" name="range3" min="0" max="256" value="20"
             onchange="triggerTransferFunctionUpdate(), updateGraph()">
         </div>
       </div>
