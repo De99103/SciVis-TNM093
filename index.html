@@ -1157,38 +1157,35 @@
 
   // Function to update the graph
   function updateGraph() {
-    // Define the dimensions and margins of the graph
     const margin = { top: 20, right: 30, bottom: 40, left: 40 },
       width = 800 - margin.left - margin.right,
       height = 400 - margin.top - margin.bottom;
 
-    // Clear the old svg content
     const svgContainer = d3.select("#graph-container svg");
-    svgContainer.selectAll("*").remove();  // This removes the old circles and axes
+    svgContainer.selectAll("*").remove();
 
-    // Append the svg object to the body of the page
     const svg = d3.select("#graph-container svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Take initial data
     const data = [
-      { x: document.querySelector('input[name="start1"]').value, y: document.querySelector('input[name="alpha1"]').value, color: document.querySelector('input[name="color1"]').value, range: document.querySelector('input[name="range1"]').value, range2: document.querySelector('input[name="range12"]').value },
-      { x: document.querySelector('input[name="start2"]').value, y: document.querySelector('input[name="alpha2"]').value, color: document.querySelector('input[name="color2"]').value, range: document.querySelector('input[name="range2"]').value, range2: document.querySelector('input[name="range22"]').value },
-      { x: document.querySelector('input[name="start3"]').value, y: document.querySelector('input[name="alpha3"]').value, color: document.querySelector('input[name="color3"]').value, range: document.querySelector('input[name="range3"]').value, range2: document.querySelector('input[name="range22"]').value},
+      { start: document.querySelector('input[name="start1"]').value, alpha: document.querySelector('input[name="alpha1"]').value, color: document.querySelector('input[name="color1"]').value, range: document.querySelector('input[name="range1"]').value, range2: document.querySelector('input[name="range12"]').value },
+      { start: document.querySelector('input[name="start2"]').value, alpha: document.querySelector('input[name="alpha2"]').value, color: document.querySelector('input[name="color2"]').value, range: document.querySelector('input[name="range2"]').value, range2: document.querySelector('input[name="range22"]').value },
+      { start: document.querySelector('input[name="start3"]').value, alpha: document.querySelector('input[name="alpha3"]').value, color: document.querySelector('input[name="color3"]').value, range: document.querySelector('input[name="range3"]').value, range2: document.querySelector('input[name="range32"]').value },
     ];
 
-    // Add shadow points
     const extendedData = [];
     data.forEach(d => {
-      extendedData.push(d);
-      extendedData.push({ x: +d.x + +(d.range)/2, y: 0, color: d.color });
-      extendedData.push({ x: +d.x - +(d.range)/2, y: 0, color: d.color });
+      const firstPointX = +d.start + +d.range2;
+      const secondPointX = firstPointX + +d.range;
+      extendedData.push({ x: firstPointX, y: d.alpha, color: d.color });
+      extendedData.push({ x: secondPointX, y: d.alpha, color: d.color });
+      extendedData.push({ x: firstPointX - +d.range2, y: 0, color: d.color });
+      extendedData.push({ x: secondPointX + +d.range2, y: 0, color: d.color });
     });
 
-    // Define the scales
     const xScale = d3.scaleLinear()
       .domain([0, 256])
       .range([0, width]);
@@ -1197,16 +1194,13 @@
       .domain([0, 256])
       .range([height, 0]);
 
-    // Add the X Axis
     svg.append("g")
       .attr("transform", `translate(0,${height})`)
       .call(d3.axisBottom(xScale));
 
-    // Add the Y Axis
     svg.append("g")
       .call(d3.axisLeft(yScale));
 
-    // Add the points
     svg.selectAll("circle")
       .data(extendedData)
       .enter().append("circle")
@@ -1215,22 +1209,117 @@
       .attr("r", 5)
       .style("fill", d => d.color);
 
-    // Add lines connecting original points to shadow points
     data.forEach(d => {
-      // Line to the right shadow point
+      const firstPointX = +d.start + +d.range2;
+      const secondPointX = firstPointX + +d.range;
+
       svg.append("line")
-        .attr("x1", xScale(d.x))
-        .attr("y1", yScale(d.y))
-        .attr("x2", xScale(+d.x + +(d.range)/2))
+        .attr("x1", xScale(firstPointX))
+        .attr("y1", yScale(d.alpha))
+        .attr("x2", xScale(firstPointX - +d.range2))
         .attr("y2", yScale(0))
         .attr("stroke", "black")
         .attr("stroke-width", 1);
 
-      // Line to the left shadow point
       svg.append("line")
-        .attr("x1", xScale(d.x))
-        .attr("y1", yScale(d.y))
-        .attr("x2", xScale(+d.x - +(d.range)/2))
+        .attr("x1", xScale(secondPointX))
+        .attr("y1", yScale(d.alpha))
+        .attr("x2", xScale(secondPointX + +d.range2))
+        .attr("y2", yScale(0))
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
+
+      // Draw line connecting initial points
+      svg.append("line")
+        .attr("x1", xScale(firstPointX))
+        .attr("y1", yScale(d.alpha))
+        .attr("x2", xScale(secondPointX))
+        .attr("y2", yScale(d.alpha))
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
+    });
+  }
+
+  // Signals an error to the user
+  function postError(msg) {
+    document.getElementById("error").innerHTML =
+      document.getElementById("error").innerHTML + "<p>" + msg + "</p>";
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    updateGraph();
+  });
+
+  // Function to update the graph
+  function updateGraph() {
+    const margin = { top: 20, right: 30, bottom: 40, left: 40 },
+      width = 800 - margin.left - margin.right,
+      height = 400 - margin.top - margin.bottom;
+
+    const svgContainer = d3.select("#graph-container svg");
+    svgContainer.selectAll("*").remove();
+
+    const svg = d3.select("#graph-container svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    const data = [
+      { start: document.querySelector('input[name="start1"]').value, alpha: document.querySelector('input[name="alpha1"]').value, color: document.querySelector('input[name="color1"]').value, range: document.querySelector('input[name="range1"]').value, range2: document.querySelector('input[name="range12"]').value },
+      { start: document.querySelector('input[name="start2"]').value, alpha: document.querySelector('input[name="alpha2"]').value, color: document.querySelector('input[name="color2"]').value, range: document.querySelector('input[name="range2"]').value, range2: document.querySelector('input[name="range22"]').value },
+      { start: document.querySelector('input[name="start3"]').value, alpha: document.querySelector('input[name="alpha3"]').value, color: document.querySelector('input[name="color3"]').value, range: document.querySelector('input[name="range3"]').value, range2: document.querySelector('input[name="range32"]').value },
+    ];
+
+    const extendedData = [];
+    data.forEach(d => {
+      const firstPointX = +d.start + +d.range2;
+      const secondPointX = firstPointX + +d.range;
+      extendedData.push({ x: firstPointX, y: d.alpha, color: d.color });
+      extendedData.push({ x: secondPointX, y: d.alpha, color: d.color });
+      extendedData.push({ x: firstPointX - +d.range2, y: 0, color: d.color });
+      extendedData.push({ x: secondPointX + +d.range2, y: 0, color: d.color });
+    });
+
+    const xScale = d3.scaleLinear()
+      .domain([0, 256])
+      .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+      .domain([0, 256])
+      .range([height, 0]);
+
+    svg.append("g")
+      .attr("transform", `translate(0,${height})`)
+      .call(d3.axisBottom(xScale));
+
+    svg.append("g")
+      .call(d3.axisLeft(yScale));
+
+    svg.selectAll("circle")
+      .data(extendedData)
+      .enter().append("circle")
+      .attr("cx", d => xScale(d.x))
+      .attr("cy", d => yScale(d.y))
+      .attr("r", 5)
+      .style("fill", d => d.color);
+
+    data.forEach(d => {
+      const firstPointX = +d.start + +d.range2;
+      const secondPointX = firstPointX + +d.range;
+
+      svg.append("line")
+        .attr("x1", xScale(firstPointX))
+        .attr("y1", yScale(d.alpha))
+        .attr("x2", xScale(firstPointX - +d.range2))
+        .attr("y2", yScale(0))
+        .attr("stroke", "black")
+        .attr("stroke-width", 1);
+
+      svg.append("line")
+        .attr("x1", xScale(secondPointX))
+        .attr("y1", yScale(d.alpha))
+        .attr("x2", xScale(secondPointX + +d.range2))
         .attr("y2", yScale(0))
         .attr("stroke", "black")
         .attr("stroke-width", 1);
